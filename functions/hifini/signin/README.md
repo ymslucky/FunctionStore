@@ -7,7 +7,8 @@
 
 ### 二、部署流程
 
-1. 配置环境变量COOKIE
-2. 连接Github仓库，配置根目录为`functions/hifini/signin`
-3. 配置入口点Entrypoint=`main.py`
-4. 配置构建命令`pip install -r requirements.txt`
+1. 连接Github仓库，配置根目录为`functions/hifini/signin`
+2. 配置入口点Entrypoint=`main.py`
+3. 配置构建命令`pip install -r requirements.txt`
+4. 配置环境变量COOKIE
+5. 配置Cron Schedule表达式为每小时执行一次`0 0-23 * * *`
