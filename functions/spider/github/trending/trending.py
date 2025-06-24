@@ -23,12 +23,16 @@ def extract_repo(html):
     rows = []
     for i in range(len(repos)):
         href = selector.xpath(f'//article[{i + 1}]/h2/a/@href').get().strip()
+        language = selector.xpath(f'//article[{i + 1}]/div[2]/span[1]/span[2]/text()').get()
+        star = selector.xpath(f'//article[{i + 1}]/div[2]/a[1]/text()').get()
+        description = selector.xpath(f'//article[{i + 1}]/p/text()').get()
+        link = f'https://github.com{href}'
         rows.append({
             'name': href,
-            'language': selector.xpath(f'//article[{i + 1}]/div[2]/span[1]/span[2]/text()').get().strip(),
-            'star': int(selector.xpath(f'//article[{i + 1}]/div[2]/a[1]/text()').get().strip().replace(",", "")),
-            'description': selector.xpath(f'//article[{i + 1}]/p/text()').get().strip(),
-            'link': f'https://github.com{selector.xpath(f'//article[{i + 1}]/h2/a/@href').get().strip()}'
+            'language': language.strip() if language is not None else 'UNKNOW',
+            'star': int(star.strip().replace(",", "")) if star is not None else 0,
+            'description': description.strip() if description is not None else 'UNKNOW',
+            'link': link
         })
     return rows
 
@@ -57,4 +61,4 @@ def main(context):
     # 向Appwrite数据库写入 数据
     save_to_appwrite(repos, context)
 
-    return context.res.success(data=repos)
+    return context.res.json(repos)
