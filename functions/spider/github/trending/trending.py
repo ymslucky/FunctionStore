@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 
 import requests
@@ -5,6 +6,7 @@ from appwrite.id import ID
 from parsel import Selector
 
 from appwrite.client import Client
+from appwrite.query import Query
 from appwrite.services.databases import Databases
 
 client = Client()
@@ -32,7 +34,8 @@ def extract_repo(html):
             'language': language.strip() if language is not None else 'UNKNOW',
             'star': int(star.strip().replace(",", "")) if star is not None else 0,
             'description': description.strip() if description is not None else 'UNKNOW',
-            'link': link
+            'link': link,
+            'date': datetime.now().strftime('%Y-%m-%d')
         })
     return rows
 
@@ -40,6 +43,15 @@ def extract_repo(html):
 def save_to_appwrite(repos, context):
     """保存数据至Appwrite"""
     for row in repos:
+        query = [
+            Query.equal('name', row['name']),
+            Query.equal('date', datetime.now().strftime('%Y-%m-%d')),
+        ]
+        exist_docs = databases.list_documents(os.environ['DATABASE_ID'], os.environ['COLLECTION_ID'], query)
+        if exist_docs['total'] > 0:
+            context.log(f'[Trending] 仓库已存在: {row["name"]}')
+            continue
+
         result = databases.create_document(os.environ['DATABASE_ID'], os.environ['COLLECTION_ID'], ID.unique(), row)
         context.log(f'[Trending] 保存数据成功: {result}')
 
